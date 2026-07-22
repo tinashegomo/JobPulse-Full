@@ -1,0 +1,16 @@
+{
+  "name": "jobpulse-watcher",
+  "version": "1.0.0",
+  "description": "Scheduled LinkedIn job search watcher for JobPulse, run via GitHub Actions.",
+  "main": "scraper/run.js",
+  "scripts": {
+    "start": "node scraper/run.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.1.0",
+    "cheerio": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

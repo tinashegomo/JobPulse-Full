@@ -1,0 +1,25 @@
+name: JobPulse Watcher
+
+on:
+  workflow_dispatch:          # triggered externally by cron-job.org every 10 min,
+                               # plus available for manual "Run workflow" testing
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run watcher
+        run: node scraper/run.js
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
