@@ -3,7 +3,7 @@
  * -----------------
  * Runs on a schedule via GitHub Actions. Each run:
  *   1. Loads active search alerts from Firestore (each alert belongs to a user)
- *   2. Fetches each LinkedIn search results page + the RemoteOK feed
+ *   2. Fetches each LinkedIn search results page + the RemoteOK feed + ApplyNow
  *   3. Parses job cards / entries out of each source
  *   4. Computes a real `postedAt` timestamp for each job
  *   5. Filters out anything older than MAX_JOB_AGE_HOURS
@@ -231,6 +231,56 @@ async function fetchRemoteOkFeed() {
   }));
 }
 
+// ---------------------------------------------------------------------------
+// 5b. ApplyNow (applynow.co.zw) provider — Zimbabwe job listings
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetches ApplyNow's Zimbabwe jobs archive page.
+ *
+ * No company field is extracted here — just title, link, and posted time, so
+ * you can click straight through to the job page. This site is built with
+ * Elementor (a WordPress page builder), and these selectors follow its
+ * standard "Posts" widget class naming convention — if no jobs come through,
+ * inspect the live page's real markup (browser DevTools -> Inspect on a job
+ * title) and update these selectors, same as the LinkedIn note above.
+ */
+async function fetchApplyNowFeed() {
+  const html = await fetchSearchPage("https://applynow.co.zw/category/zimbabwe/");
+  const $ = cheerio.load(html);
+  const jobs = [];
+
+  $(".elementor-post").each((_, el) => {
+    const post = $(el);
+    const linkEl = post.find(".elementor-post__title a").first();
+    const title = linkEl.text().trim();
+    const jobUrl = linkEl.attr("href");
+    const postedText = post
+      .find(".elementor-post-date, .elementor-post__meta-data")
+      .first()
+      .text()
+      .trim();
+
+    if (!title || !jobUrl) return;
+
+    // No numeric job ID is exposed — use the URL's slug as a stable unique ID
+    const slugMatch = jobUrl.match(/\/(\d{4})\/(\d{2})\/(\d{2})\/([^/]+)\/?$/);
+    const externalJobId = slugMatch ? slugMatch[4] : jobUrl.replace(/\W+/g, "_");
+
+    jobs.push({
+      externalJobId,
+      title,
+      company: "",
+      location: "Zimbabwe",
+      jobUrl,
+      postedText,
+      description: "", // not available on the listing page
+    });
+  });
+
+  return jobs;
+}
+
 // A small list of common words that are too generic to usefully match on
 // their own (e.g. matching "developer" alone would match almost every dev
 // job regardless of stack — still allowed, since many providers' tags are
@@ -242,8 +292,9 @@ const STOPWORDS = new Set(["a", "an", "the", "in", "on", "of", "for", "and", "or
  * GENERIC, provider-agnostic keyword matcher — not tied to any one source.
  *
  * Use this for any provider that returns a broad, UNFILTERED feed that needs
- * local keyword matching against an alert (e.g. RemoteOK today; any future
- * public API/feed that doesn't accept a search-by-keyword URL parameter).
+ * local keyword matching against an alert (e.g. RemoteOK, ApplyNow; any
+ * future public API/feed that doesn't accept a search-by-keyword URL
+ * parameter).
  *
  * Do NOT use this for providers like LinkedIn, where the search URL itself
  * (via its `keywords=` parameter) already filters results server-side before
@@ -403,6 +454,50 @@ async function processJobForAlert(job, source, alert) {
 }
 
 // ---------------------------------------------------------------------------
+// ApplyNow (Zimbabwe) — fetch once, match against Zimbabwe-relevant alerts
+// ---------------------------------------------------------------------------
+async function processApplyNow(alerts) {
+  try {
+    const applyNowJobs = await fetchApplyNowFeed();
+    console.log(`  [ApplyNow] fetched ${applyNowJobs.length} total listing(s)`);
+
+    // Only run against alerts that actually mention Zimbabwe — this is a
+    // Zimbabwe-only source, so a "Software Engineer, Germany" alert should
+    // never see these results, same principle as RemoteOK ignoring workType.
+    const zimbabweAlerts = alerts.filter((alert) =>
+      (alert.location || "").toLowerCase().includes("zimbabwe")
+    );
+
+    for (const alert of zimbabweAlerts) {
+      const matches = applyNowJobs
+        .filter((job) => matchesAlertKeywordGeneric(job, alert))
+        .map((job) => {
+          const ageHours = parseRelativeHoursAgo(job.postedText);
+          return {
+            ...job,
+            ageHours,
+            postedAt: ageHours !== null ? hoursAgoToDate(ageHours) : null,
+          };
+        });
+
+      const recentMatches = matches.filter(
+        (job) => job.ageHours !== null && job.ageHours <= MAX_JOB_AGE_HOURS
+      );
+
+      console.log(
+        `  [ApplyNow] "${alert.label || alert.id}" (user ${alert.userId}) — ${matches.length} keyword match(es), ${recentMatches.length} within ${MAX_JOB_AGE_HOURS}h`
+      );
+
+      for (const job of recentMatches) {
+        await processJobForAlert(job, "APPLYNOW", alert);
+      }
+    }
+  } catch (err) {
+    console.error("  Error processing ApplyNow feed:", err.message);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
@@ -461,6 +556,9 @@ async function main() {
   } catch (err) {
     console.error("  Error processing RemoteOK feed:", err.message);
   }
+
+  // ---- ApplyNow: Zimbabwe-specific job listings ----
+  await processApplyNow(alerts);
 
   console.log("Run complete.");
 }
