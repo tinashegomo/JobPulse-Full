@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, AlertTriangle, BookmarkCheck } from 'lucide-react';
+import { Plus, BookmarkCheck } from 'lucide-react';
 import { buildLinkedInSearchUrl } from '../../utils/buildLinkedInSearchUrl';
 import CountrySelect from '../shared/CountrySelect';
 import Button from '../shared/Button';
@@ -66,13 +66,6 @@ export default function AlertForm({ onSubmit, alertCount = 0, keywords = [], onS
 
   return (
     <>
-      {atLimit && (
-        <div className="flex items-center gap-3 p-4 rounded-[12px] bg-warning-main/10 border border-warning-main/20 text-warning-main text-[13px] font-medium mb-4">
-          <AlertTriangle className="w-5 h-5 shrink-0" />
-          <span>Maximum limit of {ALERT_LIMIT} alerts reached.</span>
-        </div>
-      )}
-
       <Button
         onClick={() => !atLimit && setIsOpen(true)}
         disabled={atLimit}

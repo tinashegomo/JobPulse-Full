@@ -7,7 +7,7 @@ import EmptyState from '../components/shared/EmptyState';
 import SkeletonJobCard from '../components/shared/SkeletonJobCard';
 import StatCard from '../components/shared/StatCard';
 import FilterChip from '../components/shared/FilterChip';
-import { Bell, Bookmark, CheckCircle2 } from 'lucide-react';
+import { Bell, Bookmark, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 export default function Alerts() {
   const { alerts, loading, error, addAlert, editAlert, removeAlert } = useAlerts();
@@ -101,6 +101,12 @@ export default function Alerts() {
           <span className="text-[12px] font-semibold text-text-muted uppercase tracking-wider px-1">
             Your Alerts ({alerts.length})
           </span>
+          {alerts.length >= 20 && (
+            <div className="flex items-center gap-3 p-4 rounded-[12px] bg-warning-main/10 border border-warning-main/20 text-warning-main text-[13px] font-medium col-span-full">
+              <AlertTriangle className="w-5 h-5 shrink-0" />
+              <span>Maximum limit of 20 alerts reached. Delete an existing alert to create a new one.</span>
+            </div>
+          )}
           {alerts.map((alert) => (
             <AlertCard
               key={alert.id}

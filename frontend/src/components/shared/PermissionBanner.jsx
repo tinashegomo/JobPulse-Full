@@ -5,31 +5,31 @@ const PermissionBanner = ({ permission, onRequestPermission }) => {
   if (permission === 'granted') return null;
 
   return (
-    <div className="glass-panel p-18 flex items-center gap-14 animate-slide-up border-l-4 border-l-warning-main">
-      <div className="shrink-0 p-10 bg-warning-bg rounded-card">
+    <div className="flex items-center gap-3 px-4 py-3 rounded-[12px] bg-surface-elevated border border-border-default animate-slide-up">
+      <div className="shrink-0 p-2 rounded-[8px] bg-warning-main/10">
         {permission === 'denied' ? (
-          <BellOff size={22} className="text-warning-main" />
+          <BellOff size={18} className="text-warning-main" />
         ) : (
-          <Bell size={22} className="text-warning-main" />
+          <Bell size={18} className="text-warning-main" />
         )}
       </div>
-      <div className="flex-1">
-        <h3 className="text-h4 font-semibold text-text-primary">
+      <div className="flex-1 min-w-0">
+        <h3 className="text-[14px] font-semibold text-text-primary leading-tight">
           {permission === 'denied'
-            ? 'Notifications are blocked'
-            : 'Enable push notifications'}
+            ? 'Notifications blocked'
+            : 'Enable notifications'}
         </h3>
-        <p className="mt-4 text-body-small text-text-secondary">
+        <p className="text-[12px] text-text-muted leading-snug mt-0.5">
           {permission === 'denied'
-            ? 'Please enable notifications in your browser settings to receive job alerts.'
-            : 'Get notified instantly when new jobs match your search alerts.'}
+            ? 'Enable in browser settings to receive job alerts.'
+            : 'Get notified instantly when new jobs match your alerts.'}
         </p>
       </div>
       {permission === 'default' && (
         <Button
           onClick={onRequestPermission}
           variant="primary"
-          size="md"
+          size="sm"
           className="shrink-0"
         >
           Enable
