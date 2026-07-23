@@ -18,7 +18,13 @@ export default function AlertForm({ onSubmit, alertCount = 0, keywords = [], onS
 
   const atLimit = alertCount >= ALERT_LIMIT;
 
-  const handleSubmit = (e) => {
+  const filteredKeywords = keyword.trim()
+    ? keywords.filter((k) =>
+        k.keyword.toLowerCase().includes(keyword.trim().toLowerCase())
+      )
+    : keywords;
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!keyword.trim() || atLimit) return;
 
@@ -26,7 +32,7 @@ export default function AlertForm({ onSubmit, alertCount = 0, keywords = [], onS
       const exists = keywords.some(
         (k) => k.keyword.toLowerCase() === keyword.trim().toLowerCase()
       );
-      if (!exists) onSaveKeyword(keyword.trim());
+      if (!exists) await onSaveKeyword(keyword.trim());
     }
 
     const label = location
@@ -62,7 +68,7 @@ export default function AlertForm({ onSubmit, alertCount = 0, keywords = [], onS
     <>
       {atLimit && (
         <div className="flex items-center gap-3 p-4 rounded-[12px] bg-warning-main/10 border border-warning-main/20 text-warning-main text-[13px] font-medium mb-4">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <AlertTriangle className="w-5 h-5 shrink-0" />
           <span>Maximum limit of {ALERT_LIMIT} alerts reached.</span>
         </div>
       )}
@@ -74,72 +80,85 @@ export default function AlertForm({ onSubmit, alertCount = 0, keywords = [], onS
         size="md"
         className="gap-2"
       >
-        <Plus className="w-4 h-4" />
+        <Plus className="w-5 h-5" />
         <span>New Alert</span>
       </Button>
 
       <Modal open={isOpen} onClose={handleClose} title="Create Search Alert">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          {/* Keyword */}
           <Input
-            label="Job Title or Keyword *"
+            label="Job Title or Keyword"
             placeholder="e.g. Senior Software Engineer"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             required
           />
 
+          {/* Saved Keywords */}
           {keywords.length > 0 && (
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[12px] font-medium text-text-muted">Saved Keywords:</span>
-              <div className="flex flex-wrap gap-1.5">
-                {keywords.map((k) => (
-                  <FilterChip
-                    key={k.id}
-                    label={k.keyword}
-                    active={keyword === k.keyword}
-                    onClick={() => setKeyword(k.keyword)}
-                  />
-                ))}
-              </div>
+            <div className="flex flex-col gap-2">
+              <span className="text-[16px] font-semibold text-text-primary">Saved Keywords</span>
+              {keyword.trim() ? (
+                filteredKeywords.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {filteredKeywords.map((k) => (
+                      <FilterChip
+                        key={k.id}
+                        label={k.keyword}
+                        active={keyword === k.keyword}
+                        onClick={() => setKeyword(k.keyword)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-[13px] text-text-muted italic">This is a new keyword</span>
+                )
+              ) : (
+                <span className="text-[13px] text-text-muted italic">Start typing to match saved keywords</span>
+              )}
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] font-medium text-text-secondary">Country</label>
-              <CountrySelect value={location} onChange={setLocation} />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] font-medium text-text-secondary">Work Type</label>
-              <select
-                value={workType}
-                onChange={(e) => setWorkType(e.target.value)}
-                className="w-full h-12 px-4 rounded-[12px] border border-border-default bg-surface-default text-[14px] text-text-primary focus-ring transition-all outline-none"
-              >
-                <option value="remote">Remote</option>
-                <option value="on-site">On-site</option>
-                <option value="hybrid">Hybrid</option>
-              </select>
-            </div>
+          {/* Country */}
+          <div className="flex flex-col gap-2">
+            <label className="text-[16px] font-semibold text-text-primary">Country</label>
+            <CountrySelect value={location} onChange={setLocation} />
           </div>
 
-          <label className="flex items-center gap-2 cursor-pointer text-[13px] text-text-secondary pt-1">
+          {/* Work Type */}
+          <div className="flex flex-col gap-2">
+            <label className="text-[16px] font-semibold text-text-primary">Work Type</label>
+            <select
+              value={workType}
+              onChange={(e) => setWorkType(e.target.value)}
+              className="w-full h-14 px-4 rounded-[12px] border border-border-default bg-surface-default text-[16px] text-text-primary focus-ring transition-all outline-none"
+            >
+              <option value="remote">Remote</option>
+              <option value="on-site">On-site</option>
+              <option value="hybrid">Hybrid</option>
+            </select>
+          </div>
+
+          {/* Save Keyword Checkbox */}
+          <label className="flex items-center gap-3 cursor-pointer text-[15px] text-text-secondary py-2">
             <input
               type="checkbox"
               checked={saveKeyword}
               onChange={(e) => setSaveKeyword(e.target.checked)}
-              className="w-4 h-4 rounded accent-brand-primary"
+              className="w-5 h-5 rounded accent-brand-primary"
             />
-            <BookmarkCheck className="w-4 h-4 text-brand-primary" />
+            <BookmarkCheck className="w-5 h-5 text-brand-primary shrink-0" />
             <span>Save keyword for quick reuse</span>
           </label>
 
-          <div className="flex items-center justify-end gap-2 pt-4 border-t border-border-default/60 mt-2">
+          {/* Actions */}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-default/60">
             <Button type="button" variant="ghost" size="md" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" size="md">
+            <Button type="submit" variant="primary" size="md" className="gap-2">
+              <Plus className="w-5 h-5" />
               Create Alert
             </Button>
           </div>

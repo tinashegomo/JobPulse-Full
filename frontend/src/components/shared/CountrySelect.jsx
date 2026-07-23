@@ -53,7 +53,7 @@ export default function CountrySelect({ value, onChange }) {
         onChange(name);
         setOpen(false);
       }}
-      className={`w-full text-left px-12 py-6 text-body-normal transition-colors rounded-input ${
+      className={`w-full text-left px-12 py-2 text-body-normal transition-colors rounded-input ${
         value === name
           ? 'bg-brand-tint text-brand-primary font-medium'
           : 'text-text-primary hover:bg-surface-muted'
@@ -68,7 +68,7 @@ export default function CountrySelect({ value, onChange }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`w-full flex items-center justify-between gap-8 rounded-input border bg-surface-elevated px-12 py-8 text-body-normal text-left outline-none transition-all duration-200 ${
+        className={`w-full flex items-center justify-between gap-8 h-14 px-4 rounded-[12px] border bg-surface-elevated text-[16px] text-left outline-none transition-all duration-200 ${
           value
             ? 'text-text-primary border-border-default focus:border-border-focus focus-ring'
             : 'text-text-muted border-border-default focus:border-border-focus focus-ring'

@@ -95,7 +95,7 @@ export default function Home() {
 
       {/* Search & Filters */}
       {jobs.length > 0 && (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4 mb-1">
           <SearchBar
             value={searchQuery}
             onChange={setSearchQuery}

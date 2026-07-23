@@ -53,7 +53,7 @@ export default function Alerts() {
       {keywords.length > 0 && (
         <div className="flex flex-col gap-2 pt-1">
           <span className="text-[12px] font-semibold text-text-muted uppercase tracking-wider px-1">
-            Quick Keywords
+            Quick Keywords <span className="normal-case font-normal text-text-muted/70">(click to remove)</span>
           </span>
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
             {keywords.map((k) => (

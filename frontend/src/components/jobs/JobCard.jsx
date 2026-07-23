@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ExternalLink, Eye, EyeOff, Trash2, Info, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { markJobSeen, markJobUnseen, hideJob } from '../../api/firestoreService';
+import { showError } from '../../utils/showError';
 import Card from '../shared/Card';
 import Badge from '../shared/Badge';
 import InfoRow from '../shared/InfoRow';
@@ -21,10 +22,18 @@ export default function JobCard({ job }) {
 
   const handleApply = async (e) => {
     e?.stopPropagation();
+    // Open the job page immediately — don't block on Firestore
+    const newTab = window.open(job.jobUrl, '_blank', 'noopener,noreferrer');
+
+    // Fire-and-forget the Firestore write in the background
     if (currentUser) {
-      await markJobSeen(currentUser.uid, job.source, job.externalJobId);
+      markJobSeen(currentUser.uid, job.source, job.externalJobId).catch(() => {});
     }
-    window.open(job.jobUrl, '_blank', 'noopener,noreferrer');
+
+    // If popup was blocked or tab failed to open, show an error
+    if (!newTab) {
+      showError('Could not open the job page. Please check your network connection and try again.');
+    }
   };
 
   const handleToggleSeen = async (e) => {

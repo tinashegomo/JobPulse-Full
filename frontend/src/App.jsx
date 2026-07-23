@@ -4,6 +4,7 @@ import { useForegroundMessages } from './hooks/useForegroundMessages';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
 import Toast from './components/shared/Toast';
+import ErrorToast from './components/shared/ErrorToast';
 import Home from './pages/Home';
 import Alerts from './pages/Alerts';
 import Login from './pages/Login';
@@ -35,6 +36,7 @@ const App = () => {
             onClose={() => dismiss(i)}
           />
         ))}
+        <ErrorToast />
       </AuthProvider>
     </BrowserRouter>
   );

@@ -60,17 +60,17 @@ export default function AlertCard({ alert, onToggle, onDelete }) {
         {alert.label || alert.keyword}
       </h3>
 
-      <div className="flex flex-wrap items-center gap-3 text-[13px] text-text-secondary">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-text-secondary">
         {alert.keyword && (
-          <div className="flex items-center gap-1">
-            <Search className="w-4 h-4 text-text-muted" />
+          <div className="flex items-center gap-1.5">
+            <Search className="w-[18px] h-[18px] text-text-muted" />
             <span className="truncate">{alert.keyword}</span>
           </div>
         )}
         {alert.keyword && alert.location && <span className="text-text-muted/60">•</span>}
         {alert.location && (
-          <div className="flex items-center gap-1">
-            <MapPin className="w-4 h-4 text-text-muted" />
+          <div className="flex items-center gap-1.5">
+            <MapPin className="w-[18px] h-[18px] text-text-muted" />
             <span className="truncate">{alert.location}</span>
           </div>
         )}

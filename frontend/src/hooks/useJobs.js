@@ -22,6 +22,10 @@ export const useJobs = () => {
           const state = userStates[key];
           return !state?.hidden;
         })
+        .filter((job) => {
+          const title = (job.title || '').toLowerCase();
+          return title !== 'hire feed';
+        })
         .map((job) => {
           const key = `${job.source}_${job.externalJobId}`;
           const state = userStates[key];

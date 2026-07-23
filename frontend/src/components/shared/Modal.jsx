@@ -24,7 +24,7 @@ export default function Modal({ open, onClose, title, children, className = '' }
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-200"
@@ -37,17 +37,17 @@ export default function Modal({ open, onClose, title, children, className = '' }
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className={`relative w-full max-w-[440px] max-h-[85vh] rounded-[20px] bg-surface-default border border-border-default shadow-xl flex flex-col animate-scale-in z-10 ${className}`}
+        className={`relative w-full sm:max-w-[440px] max-h-[90vh] sm:max-h-[85vh] rounded-t-[20px] sm:rounded-[20px] bg-surface-default border border-border-default shadow-xl flex flex-col animate-scale-in z-10 ${className}`}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border-default shrink-0">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-border-default shrink-0">
           <h2 id="modal-title" className="text-[18px] font-semibold text-text-primary tracking-tight">
             {title}
           </h2>
           <IconButton size="sm" variant="ghost" onClick={onClose} ariaLabel="Close dialog">
-            <X className="w-4 h-4 text-text-muted hover:text-text-primary" />
+            <X className="w-5 h-5 text-text-muted hover:text-text-primary" />
           </IconButton>
         </div>
-        <div className="flex-1 overflow-y-auto p-5">
+        <div className="flex-1 overflow-y-auto px-6 py-5">
           {children}
         </div>
       </div>
