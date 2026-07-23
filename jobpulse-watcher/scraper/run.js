@@ -147,7 +147,7 @@ function parseJobCards(html) {
     const urn = card.attr("data-entity-urn") || "";
     const externalJobId = urn.split(":").pop();
 
-    if (externalJobId && title) {
+    if (externalJobId && title && title.toLowerCase() !== "hire feed") {
       jobs.push({ externalJobId, title, company, location, jobUrl, postedText });
     }
   });
